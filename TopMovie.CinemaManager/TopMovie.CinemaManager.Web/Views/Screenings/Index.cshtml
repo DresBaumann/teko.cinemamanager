@@ -1,0 +1,82 @@
+﻿@using System.Runtime.InteropServices.JavaScript
+@model IEnumerable<TopMovie.CinemaManager.Core.Features.Screenings.Models.Screening>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+	<h1>Vorführungen</h1>
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <label for="screeningDate">Datum wählen:</label>
+        <input type="date" class="form-control" id="screeningDate" name="screeningDate" value="@ViewBag.SelectedDate.ToString("yyyy-MM-dd")" onchange="location.href='?screeningDate='+this.value">
+    </div>
+</div>
+
+@{
+    var screeningDate = DateTime.Now.Date;
+    if (ViewBag.SelectedDate != null)
+    {
+        screeningDate = (DateTime)ViewBag.SelectedDate;
+    }
+
+    var standardTimes = new List<TimeSpan> {
+        new TimeSpan(14, 15, 0),
+        new TimeSpan(17, 15, 0),
+        new TimeSpan(20, 15, 0)
+    };
+
+    if (screeningDate.DayOfWeek == DayOfWeek.Saturday || screeningDate.DayOfWeek == DayOfWeek.Sunday)
+    {
+        standardTimes.Add(new TimeSpan(23, 0, 0));
+    }
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Datum</th>
+            <th>Zeit</th>
+            <th>Film</th>
+            <th>Aktionen</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var time in standardTimes)
+        {
+	        var existingScreening = Model.FirstOrDefault(s => s.StartTime.Date == screeningDate && s.StartTime.TimeOfDay == time);
+
+            <tr>
+                <td>@screeningDate.ToString("dd.MM.yyyy")</td>
+                <td>@time</td>
+                <td>
+                    @if (existingScreening != null)
+                    {
+                        @existingScreening.Movie.Title
+                    }
+                    else
+                    {
+                        <text>Kein Screening geplant</text>
+                    }
+                </td>
+                <td>
+                    @if (existingScreening != null)
+                    {
+                        <a asp-action="Edit" asp-route-id="@existingScreening.ScreeningId" class="btn btn-primary btn-sm">Edit</a>
+                        <a asp-action="Details" asp-route-id="@existingScreening.ScreeningId" class="btn btn-secondary btn-sm">Details</a>
+                        <a asp-action="Delete" asp-route-id="@existingScreening.ScreeningId" class="btn btn-danger btn-sm">Delete</a>
+                    }
+                    else
+                    {
+                        <a asp-action="Create" asp-route-screeningDate="@screeningDate.ToString("yyyy-MM-ddT")@time.ToString(@"hh\:mm")" asp-route-hallId="@ViewBag.HallId" class="btn btn-success btn-sm">Create</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    <a asp-action="Create" asp-route-hallId="@ViewBag.HallId" asp-route-screeningDate="@DateTime.Now.ToString("yyyy-MM-dd")" class="btn btn-info">Weiteres Screening erstellen</a>
+</div>

@@ -1,0 +1,66 @@
+﻿@model TopMovie.CinemaManager.Core.Features.Cinemas.Models.CinemaHall
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>CinemaHall</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+	        <div class="form-group">
+		        <label asp-for="CinemaId" class="control-label"></label>
+		        <select asp-for="CinemaId" class ="form-control" asp-items="ViewBag.CinemaId"></select>
+	        </div>
+	        <div id="rowsContainer">
+	        </div>
+	        <button type="button" id="addRow">Reihe hinzufügen</button>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+	<a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+	<script>
+        let currentRowLetter = 'A'.charCodeAt(0); // Startet bei 'A'
+        
+        document.getElementById('addRow').addEventListener('click', function() {
+            const rowContainer = document.getElementById('rowsContainer');
+            const newRow = document.createElement('div');
+            newRow.classList.add('row');
+
+            // Erstellen des Labels für die Reihe
+            const rowLabel = document.createElement('label');
+            rowLabel.textContent = `Reihe ${String.fromCharCode(currentRowLetter)}: `;
+            newRow.appendChild(rowLabel);
+
+            // Erstellen des Eingabefelds für die Anzahl der Sitze
+            const seatInput = document.createElement('input');
+            seatInput.type = 'number';
+            seatInput.name = `rows[${String.fromCharCode(currentRowLetter)}]`;
+            seatInput.min = 1;
+            seatInput.required = true;
+            newRow.appendChild(seatInput);
+            
+            rowContainer.appendChild(newRow);
+            
+            currentRowLetter++;
+        });
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

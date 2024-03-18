@@ -1,0 +1,83 @@
+﻿@model AnalyticsViewModel
+
+@{
+    ViewData["Title"] = "Analytik";
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Belegung je Kino und/oder Projektionssaal</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Kino</th>
+                        <th>Projektionssaal</th>
+                        <th>Belegung</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OccupancyByCinemaAndHall)
+                    {
+                        <tr>
+                            <td>@item.CinemaName</td>
+                            <td>@item.CinemaHallName</td>
+                            <td>@item.Occupancy</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-12">
+            <h3>Umsatz</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <h4>Pro Kino</h4>
+                    @foreach (var item in Model.RevenueByCinema)
+                    {
+                        <p>@item.Name: @item.Revenue.ToString("C")</p>
+                    }
+                </div>
+                <div class="col-md-4">
+                    <h4>Pro Projektionssaal</h4>
+                    @foreach (var item in Model.RevenueByCinemaHall)
+                    {
+                        <p>@item.Name: @item.Revenue.ToString("C")</p>
+                    }
+                </div>
+                <div class="col-md-4">
+                    <h4>Pro Film</h4>
+                    @foreach (var item in Model.RevenueByMovie)
+                    {
+                        <p>@item.Name: @item.Revenue.ToString("C")</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <h3>Umsatz pro registrierte/r Benutzer/in</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Member ID</th>
+                        <th>Umsatz</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.RevenueByUser)
+                    {
+                        <tr>
+                            <td>@item.MemberId</td>
+                            <td>@item.Revenue.ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

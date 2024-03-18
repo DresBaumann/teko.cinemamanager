@@ -1,0 +1,174 @@
+﻿@model TopMovie.CinemaManager.Core.Features.Reservations.Models.Reservation
+
+@{
+    ViewData["Title"] = "Create";
+	var cinemaHallSeats = ViewBag.CinemaHallSeats as List<TopMovie.CinemaManager.Core.Features.Cinemas.Models.SeatIdentifier>;
+	var maxRow = ViewBag.MaxRow;
+	var maxSeatNumber = ViewBag.MaxSeatNumber;
+
+}
+
+<h1>Create</h1>
+
+<h4>Reservation</h4>
+<hr />
+<div>
+	<strong>Kino:</strong> @ViewBag.ScreeningDetails.CinemaHall.Cinema.Name<br>
+	<strong>Kinosaal:</strong> @ViewBag.ScreeningDetails.CinemaHall.Name<br>
+	<strong>Datum und Zeit:</strong> @ViewBag.ScreeningDetails.StartTime.ToString("dd.MM.yyyy HH:mm")<br>
+	<strong>Film:</strong> @ViewBag.ScreeningDetails.Movie.Title
+</div>
+
+<div class="row">
+	<div class="col-md-4">
+        <form asp-action="Create">
+	        <input type="hidden" asp-for="ScreeningId" />
+	        <input type="hidden" id="SelectedSeatIds" name="SelectedSeatIds" value="" />
+
+	        <div class="seat-grid">
+		        @* Kopfzeile für Sitznummern *@
+		        <div class="seat-row">
+			        <div class="seat-row-label"></div> <!-- Leere Zelle für die obere linke Ecke -->
+			        @for (int number = 1; number <= maxSeatNumber; number++)
+			        {
+				        <div class="seat-cell">@number</div>
+			        }
+		        </div>
+
+		        @* Sitzreihen *@
+		        @for (char row = 'A'; row <= maxRow; row++)
+		        {
+			        <div class="seat-row">
+				        <div class="seat-row-label">@row</div>
+				        @for (int number = 1; number <= maxSeatNumber; number++)
+				        {
+					        var seat = cinemaHallSeats.FirstOrDefault(si => si.Row == row.ToString() && si.Number == number);
+					        <div class="seat-cell">
+						        @if (seat != null && seat.IsAvailable)
+						        {
+							        <input type="checkbox" id="seat-@row@number" name="selectedSeats" value="@seat.Id"
+							               data-row="@row" data-number="@number"
+							               class="seat-checkbox">
+							        <label for="seat-@row@number"></label>
+						        }
+						        else
+						        {
+							        <label class="seat-unavailable">x</label>
+						        }
+					        </div>
+				        }
+			        </div>
+		        }
+	        </div>
+	        <div id="membership-info">
+		        <strong>Mitgliedschaftstyp:</strong> <span id="membership-type">@ViewBag.MembershipType</span><br>
+		        <strong>Rabatt pro Sitz:</strong> <span id="discount-per-seat">0</span> CHF
+	        </div>
+	        <div id="selected-seats">
+		        <strong>Ausgewählte Plätze:</strong>
+		        <div id="seat-list"></div>
+	        </div>
+	        <div id="total-price">
+		        <strong>Gesamtpreis:</strong> <span id="price">0</span> CHF
+	        </div>
+
+	        <input type="submit" value="Reservierung abschliessen" class="btn btn-primary" />
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-controller="Screenings" asp-action="Program">Back</a>
+</div>
+
+<style>
+	.seat-grid {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.seat-row {
+		display: flex;
+	}
+
+	.seat-row-label, .seat-cell {
+		width: 30px;
+		height: 30px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid #ddd;
+		margin-right: 2px;
+	}
+
+	.seat-row:first-child .seat-cell {
+		font-weight: bold;
+	}
+
+	.seat-row .seat-row-label {
+		font-weight: bold;
+	}
+
+		.seat-cell input[type="checkbox"] + label {
+			cursor: pointer;
+		}
+
+		.seat-cell input[type="checkbox"]:disabled + label {
+			background-color: #ccc;
+			cursor: not-allowed;
+		}
+
+		.seat-cell input[type="checkbox"]:checked + label {
+			background-color: #90ee90;
+		}
+</style>
+@section Scripts {
+	@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+	<script>
+			$(document).ready(function () {
+				var membershipType = '@ViewBag.MembershipType';
+				var discountMap = {
+					'Bronze': 3.00,
+					'Silber': 4.00,
+					'Gold': 5.00
+				};
+				var discount = discountMap[membershipType] || 0;
+				var pricePerSeat = @ViewBag.ScreeningDetails.Price - discount;
+
+			$('#membership-type').text(membershipType);
+			$('#discount-per-seat').text(discount.toFixed(2));
+
+				function updateSelectedSeatsInput() {
+					var selectedSeats = $('.seat-checkbox:checked').map(function () {
+						return $(this).data('row') + $(this).data('number');
+					}).get().join(',');
+
+					$('#SelectedSeatIds').val(selectedSeats);
+					updateSelectedSeatsDisplay();
+					updatePriceDisplay();
+				}
+
+				function updateSelectedSeatsDisplay() {
+					var selectedSeatsText = $('.seat-checkbox:checked').map(function () {
+						return $(this).data('row') + $(this).data('number');
+					}).get().join(', ');
+
+					$('#seat-list').text('Ausgewählte Plätze: ' + selectedSeatsText);
+				}
+
+				function updatePriceDisplay() {
+					var selectedSeatCount = $('.seat-checkbox:checked').length;
+					var totalPrice = selectedSeatCount * pricePerSeat;
+					$('#price').text(totalPrice.toFixed(2));
+				}
+
+				$('.seat-checkbox').change(function () {
+					updateSelectedSeatsInput();
+				});
+
+				// Initialer Aufruf, um den Gesamtpreis beim Laden zu berechnen
+				updatePriceDisplay();
+			});
+	</script>
+}

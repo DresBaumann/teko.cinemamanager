@@ -1,0 +1,38 @@
+﻿@model TopMovie.CinemaManager.Core.Features.Reservations.Models.Reservation
+
+@{
+	ViewData["Title"] = "Danke fürs Buchen!";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+	<h4>Reservierungsdetails</h4>
+	<hr />
+	<dl class="row">
+		<dt class="col-sm-2">Kino</dt>
+		<dd class="col-sm-10">@Model.Screening.CinemaHall.Cinema.Name</dd>
+        
+		<dt class="col-sm-2">Datum und Zeit</dt>
+		<dd class="col-sm-10">@Model.Screening.StartTime.ToString("dd.MM.yyyy HH:mm")</dd>
+        
+		<dt class="col-sm-2">Kinosaal</dt>
+		<dd class="col-sm-10">@Model.Screening.CinemaHall.Name</dd>
+        
+		<dt class="col-sm-2">Reservierte Plätze</dt>
+		<dd class="col-sm-10">
+			@string.Join(", ", Model.ReservedSeats.Select(rs => $"{rs.Row}{rs.Number}"))
+		</dd>
+		
+		<dt class="col-sm-2">ReservationId</dt>
+		<dd class="col-sm-10">@Model.ReservationId</dd>
+	</dl>
+	<p>
+		Reservierte Tickets müssen bis spätestens 15 Minuten vor Beginn der Vorstellung 
+		am Empfang gegen Vorweisen der Reservationsbestätigung abgeholt und bezahlt 
+		werden. Nach dieser Frist werden die reservierten Plätze für den Verkauf wieder freigegeben.
+	</p>
+</div>
+<div>
+	<a asp-action="Index">Zurück zur Liste</a>
+</div>
